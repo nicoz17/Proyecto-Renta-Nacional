@@ -9,3 +9,4 @@ def cleanmenosuno(file, columna):
     return None
 
 # la gracia seria hacer un main que limpia los datos a nuestro gusto
+#######
