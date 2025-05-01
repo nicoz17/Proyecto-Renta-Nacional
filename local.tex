@@ -1,0 +1,236 @@
+
+\usepackage{amsmath, amssymb}
+\usepackage[utf8]{inputenc}
+
+
+\section{Predicción de ventas totales a Corto Plazo}
+
+\textbf{Definición} Corto plazo nos referimos a que tenemos información sobre el \textbf{detalle} y el \textbf{número} total de las cotizaciones.
+
+\subsection{Formulación del problema}
+
+Sea  $\mathcal{Z} = \{0,1\}$, \( x = \mathbb{R}^d \), \( y = [k]_{1,\ldots,k} \).
+
+y sea \( D \) una distribución con soporte en \( \mathcal{Z} \times \mathcal{X} \times \mathcal{Y} \).
+
+\( \mathcal{Z} \) representa el conjunto binario donde:
+\begin{itemize}
+    \item \( 0 \): no se vende la renta.
+    \item \( 1 \): se vende la renta.
+\end{itemize}
+
+\( \mathcal{X} \): representa el conjunto de todas las posibles cotizaciones, las cuales tienen "d" características.
+
+\( \mathcal{Y} \): representa el conjunto de los rankings.
+
+Si \( W = (Z, X, Y) \) es una variable aleatoria que distribuye \( \sim D \), entonces una realización \( W(\omega) \) representa una cotización \( X(\omega) \in \mathcal{X} \), el ranking de la cotización \( Y(\omega) \in [K] \) y si la cotización fue vendida \( Z(\omega) \in \{0,1\} \).
+
+Ahora, desde una cotización \( x \in \mathbb{R}^d \), queremos calcular el valor esperado de la venta de esta:
+
+\[ V_E(x) = P(z=1|X=x) \cdot x^p \]
+
+donde \( x^p \in \mathbb{R} \) es la característica de \( x \in \mathbb{R}^d \) que representa el precio de la renta.
+\\
+\\
+También queremos obtener algo sobre los rankings de la cotización. Para acceder a ella usamos probabilidades totales de manera que:
+
+\[ P(z=1|X=x) = \sum_{r \in [K]} P(z=1|Y=r) P(Y=r|X=x) \]
+
+luego
+
+\[ V_E(x) = \sum_{r \in [K]} P(z=1|Y=r) P(Y=r|X=x) x^p. \]
+
+Luego para calcular \( V_E(x) \) debidamente es necesario estimar \( P(z=1|Y=r) \) y \( P(Y=r|X=x) \).
+
+\subsection{Estimación de \( P(Y=r|X=x) \)}
+
+Procedemos a estimar \( P(Y=r|X=x) \), y luego la estimación de \( P(z=1|Y=r) \) será análoga.
+
+Definimos:
+
+\[ \alpha : \mathcal{X} \times [k] \rightarrow [0,1] \]
+
+\[ \alpha(x,r) = P(Y=r|X=x) \quad \forall x \in \mathcal{X}, r \in [k] \]
+
+Lo cual cumple:
+
+\[ \sum_{r \in [k]} \alpha(x,r) = 1 \quad \forall x \in \mathcal{X}. \]
+
+Luego el espacio de funciones de búsqueda:
+
+\[ \mathcal{F} = \Big\{ \alpha : \mathcal{X} \times [k] \rightarrow [0,1] \Big| \sum_{r} \alpha(x,r) = 1 \forall \mathcal{X} \Big\} \]
+
+El objetivo primero es lograr acotar \( \mathcal{F} \) y que en su forma actual es demasiado grande.
+
+Para esto, tenemos un conjunto de datos:
+
+\[ S = \{(Z_i, X_i, Y_i)\}_{i=1}^n \]
+
+que pueden verse como realizaciones independientes de una variable aleatoria $W \sim \mathcal{D}$.
+
+\subsection{Aplicación del Teorema de Bayes}
+
+Observemos que, por el teorema de Bayes:
+
+\[ P(Y=r|X=x)P(X=x) = P(X=x|Y=r)P(Y=r) \]
+
+\[ \Rightarrow P(Y=r|X=x) = \frac{P(Y=r)}{P(X=x)} P(X=x|Y=r). \]
+
+Podríamos escribir \( P \) a través de los datos:
+
+\[ P \approx P^1 = \frac{1}{n} \sum_{i=1}^n \delta_{\{X_i\}} * \delta_{\{Y_i\}} \]
+
+e imponer \( P(Y=r|X=x) = \alpha(x,r) \) con lo que obtendríamos:
+
+\[ \alpha(X_i,r) = \mathbb{1}(Y_i=r) \quad (*) \]
+
+es decir,
+
+\[ \alpha(X_i,r) = 
+\begin{cases} 
+1 & \text{si } Y_i = r \\ 
+0 & \text{si } Y_i \neq r 
+\end{cases} \]
+
+e imponer esta condición por restricción. Pero esto es demasiado restrictivo, ya que obliga a que, si tenemos un dato nuevo \( X \), si esta cotización calza con algún datos antiguo, este resulte con certeza en el mismo ranking, lo cual no tiene en cuenta el ruido ni las 
+distintas situaciones que pueden haber semana a semana.
+
+Es decir, si en una semana la cotización obtiene un ranking "r", no necesariamente otra semana una cotización similar tendrá el mismo ranking. Este efecto lo reprimimos asignando probabilidades adecuadas.
+
+Para capturar estos efectos, imponemos que se cumple (*) pero en promedio ponderando los datos observados:
+
+\[ \sum_{i=1}^{n} \alpha(x_i,r) X_i = \sum_{i=1}^{n} \mathbb{1}(Y_i = r) X_i \quad (**) \]
+
+y que (**) son "d" condiciones y que \( \alpha \) es una función en \( \mathbb{R}^d \).
+
+\subsection{Entropía Condicional}
+
+La entropía condicional es:
+
+\[ H(Y|X) = \int_{\mathcal{X}} H(Y|X=x) P_X(dx) \]
+
+con
+
+\[ H(Y|X=x) = -\sum_{r=1}^{k} P(Y=r|X=x) \ln P(Y=r|X=x) \]
+\[ = -\sum_{r \in [k]} \alpha(r,x) \ln (\alpha(r,x)) \]
+
+\[ \Rightarrow \]
+\[ H(Y|X)(\alpha) = -\int_{\mathcal{X}} \sum_{r=1}^{k} \alpha(r,x) \ln(\alpha(r,x)) P_X(dx) \]
+
+Ahora, obviamente esto no lo podemos calcular ya que no conocemos \( P_X \), por lo que lo estimamos a través de los datos:
+
+\[ P \approx P^1 = \frac{1}{n} \sum_{i=1}^{n} \delta(x_i - x)dx \]
+
+\[ \Rightarrow \]
+\[ H(Y|X)(\alpha)' = -\frac{1}{n} \sum_{i=1}^{n} \sum_{r=1}^{k} \alpha(r,x_i) \ln(\alpha(r,x_i)) \]
+
+\subsection{Problema de Optimización}
+
+El problema de maximizar \( H(Y|X)(\alpha) \) se convierte en un problema convexo (sobre todas las funciones \( \alpha \)), pero vemos que tanto la función objetivo como las restricciones dependen solo de cómo \( \alpha \) es evaluada en los datos: \( \alpha(x_i,r) \).
+
+Luego, si definimos \( B \in \mathbb{R}^{n \times k} \) como:
+
+\[ B = (b_{ir})_{ir} \quad \text{con } b_{ir} = \alpha(x_i,r) \]
+
+el problema a resolver es:
+
+\[ \max_B S(B) \]
+
+sujeto a:
+
+\[ \sum_{r=1}^{k} b_{ir} = 1 \quad \forall i \in [n] \]
+
+\[ \sum_{i=1}^{n} b_{ir} X_{ij} = \sum_{i=1}^{n} \mathbb{1}(Y_i = r) X_{ij} \quad \forall j \in [d] \]
+
+\[ b_{ir} \geq 0 \quad \forall i \in [n], \forall r \in [k]. \]
+
+donde:
+
+\[ S(B) = \sum_{i=1}^{n} \sum_{r=1}^{k} b_{ir} \ln(b_{ir}) \]
+
+Este es un problema convexo porque la función \( S(B) \) es convexa (\( f(x) = x \ln x \) es convexa para \( x \geq 0 \)) y las restricciones son lineales en \( B \).
+
+\subsection{Solución del Problema}
+
+Por las condiciones de KKT, el Lagrangeano es:
+
+\[ \mathcal{L}(B, \mu, \nu, w) = S(B) - \sum_{i,r} \mu_{ir} b_{ir} + \sum_{i} \nu_i \left( \sum_{r} b_{ir} - 1 \right) - \sum_{r,j} w_{rj} \left( \sum_{i} b_{ir} X_{ij} - \sum_{i} \mathbb{1}(Y_i = r) X_{ij} \right) + C \]
+
+donde \( C \) es independiente de \( B \).
+
+La solución óptima \( B^* \) satisface:
+
+\[ \nabla \mathcal{L}(B^*) = 0 \]
+
+\[ \mu_{ir} b_{ir}^* = 0 \quad \forall i,r \]
+
+con \( \mu \in \mathbb{R}^{n \times k}, \nu \in \mathbb{R}^n, w \in \mathbb{R}^{k \times d}, \mu \geq 0 \) y \( (\mu, \nu, w) \neq 0 \).
+
+De esto obtenemos:
+
+\[ \ln(b_{ir}^*) + 1 - \mu_{ir}^* - \nu_i - \langle w_r, X_i \rangle = 0 \]
+
+\[ \Rightarrow b_{ir}^* = e^{\mu_{ir}^* - \nu_i - 1} \cdot e^{\langle w_r, X_i \rangle} \]
+
+donde \( w_r \in \mathbb{R}^d \) es el vector asociado al multiplicador \( w \).
+
+Como \( b_{ir}^* > 0 \) para todo \( i,r \), entonces \( \mu_{ir} = 0 \) para todo \( i,r \).
+
+Usando \( \sum_{r} b_{ir} = 1 \), tenemos:
+
+\[ e^{-\nu_i - 1} = \frac{1}{\sum_{r \in [k]} e^{\langle w_r, X_i \rangle}} \]
+
+\[ \Rightarrow b_{ir} = \frac{\exp(\langle w_r, X_i \rangle)}{\sum_{q=1}^{k} \exp(\langle w_q, X_i \rangle)} \]
+
+para algunos \( w_1, \ldots, w_k \in \mathbb{R}^d \).
+
+\subsection{Estimación Final}
+
+Luego, encontramos una forma funcional para la estimación:
+
+\[ \alpha(r, x_i) = \frac{e^{\langle w_r, x_i \rangle}}{\sum_{q} e^{\langle w_q, x_i \rangle}} \]
+
+y generalizamos esta forma para todos los valores de \( x \in \mathbb{R}^d \).
+
+Por lo que definimos nuestro conjunto \( \Lambda \) caracterizado como:
+
+\[ \Lambda = \left\{ \alpha(w, r, \cdot) : [k] \times \mathbb{R}^d \rightarrow [0,1] \middle| \alpha(w, r, x) = \frac{e^{\langle w_r, x \rangle}}{\sum_{q=1}^{k} e^{\langle w_q, x \rangle}}, w \in \mathbb{R}^{k \times d} \right\} \]
+
+Luego nuestro conjunto \( \Lambda \) ahora es de dimensión finita.
+
+Habiendo hecho esto, podemos estimar la función \( \alpha(r, x) \) utilizando el principio de máxima verosimilitud asociado al conjunto de datos \( S = \{(x_i, y_i)\}_{i=1}^n \).
+
+La función de verosimilitud es:
+
+\[ \mathcal{L}(S|\alpha \in \Lambda)(w) = \prod_{i=1}^{n} \alpha(w, Y_i, x_i) = \prod_{i=1}^{n} \frac{\exp\{\langle w_{Y_i}, x_i \rangle\}}{\sum_{r=1}^{k} \exp\{\langle w_r, x_i \rangle\}} \]
+
+\[ = \exp \left\{ \sum_{i=1}^{n} \left[ \langle w_{Y_i}, x_i \rangle - \ln \left( \sum_{r=1}^{k} \exp(\langle w_r, x_i \rangle) \right) \right] \right\} \]
+
+luego el principio de máxima verosimilitud es equivalente a:
+
+\[ \min_{w \in \Omega \subseteq \mathbb{R}^{k \times d}} \hat{R}_S(w) \]
+
+donde \( \Omega \) es convexo y cerrado, y:
+
+\[ \hat{R}_S(w) = -\frac{1}{n} \log (\mathcal{L}(S|\alpha \in \Lambda)) \]
+
+Si \( w^* \) es la solución (que existe y es única porque el problema es convexo), entonces:
+
+\[ \alpha(r, x, w^*) \approx P(Y = r | X = x). \]
+
+Todos los argumentos son análogos para obtener la estimación \( \mu(z, r) \) de \( P(z = z | Y = r) \):
+
+\[ \mu(u, z, r) = \frac{e^{u_z r}}{e^{u_0 r} + e^{u_1 r}} \]
+
+\[ \Rightarrow \mu(u^*, z, r) \approx P(z = z | Y = r) \]
+
+\subsection{Estimación Final del Valor Esperado}
+
+Con lo que, desde una nueva cotización \( x \in \mathbb{R}^d \), definimos el VE (venta estimada) como:
+
+\[ VE(x) = \sum_{r=1}^{k} \mu(w^*, 1, r) \alpha(w^*, r, x) x^p \]
+
+y si tenemos \( \{x_l\}_{l=1}^{N} \) nuevas corigaciones, el VTE (venta total estimada) será:
+
+\[ VTE = \sum_{l=1}^{N} VE(x_l). \]
+
