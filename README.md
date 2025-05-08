@@ -69,3 +69,4 @@ El proyecto está estructurado de la siguiente manera:
 1. Clonar el repositorio:
    ```bash
    git clone https://github.com/tu-usuario/analisis-rentas-vitalicias.git
+2. Crear un entorno virtual usando requirements.txt
