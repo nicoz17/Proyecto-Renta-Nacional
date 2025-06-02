@@ -1,0 +1,24 @@
+% Define \then como ⇒
+\newcommand{\then}{\Rightarrow}
+
+% Define \grad{f}{x} como ∇f(x)
+\newcommand{\grad}[2]{\nabla #1(#2)}
+
+% Conjuntos numéricos
+\newcommand{\reals}{\mathbb{R}}      % 
+\newcommand{\naturals}{\mathbb{N}}   % 
+\newcommand{\integers}{\mathbb{Z}}   % 
+\newcommand{\rationals}{\mathbb{Q}}  % 
+\newcommand{\complex}{\mathbb{C}}    % 
+
+\newcommand{\inprod}[2]{\left\langle #1, #2 \right\rangle}
+
+\newif\ifshowcomments   % Define la condición
+
+\showcommentstrue      % <- Puedes cambiar esto a \showcommentsfalse en el main si quieres ocultarlos
+
+\ifshowcomments
+  \newcommand{\nota}[1]{\textcolor{red}{[Nota: #1]}}  % Se ve en rojo
+\else
+  \newcommand{\nota}[1]{}  % No muestra nada
+\fi

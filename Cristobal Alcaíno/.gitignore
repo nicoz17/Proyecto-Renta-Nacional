@@ -1,0 +1,8 @@
+mockup/BBDD/*
+# Ignorar archivos temporales
+*.log
+*.tmp
+
+# Ignorar entornos virtuales
+venv/
+.env/

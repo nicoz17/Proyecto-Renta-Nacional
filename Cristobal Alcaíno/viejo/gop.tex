@@ -1,0 +1,34 @@
+$$ I_{G_t} + I_{M_t} + I_{B_t} \leq s $$
+Definido como los inventarios y la capacidad de almacenamiento $\forall t \in 1...T$
+\\
+Definimos una variable auxiliar como $A_{Gt}$ que almacena en un turno una cantidad de genero.
+$$ A_{Gt} = I_{Gt} + G_t \forall t \in T $$
+Donde queremos decir que vamos a usar auxiliarmente el genero que tengamos guardados y el que decidamos producir (en kg).
+A su vez lo mismo con la ropa en mal estado donde:
+$$A_{Mt} = I_{Mt} + kr_m\forall t \in 1...T$$ donde decimos que a lo mas vamos a usar la ropa mala que tengamos en inventario junto con la que 
+nos llegue.
+\\ 
+Finalmente para la ropa buena tenemos algo como:
+$A_{Bt} = I_{Bt} + k r_b + B_t$ donde decimos que usaremos auxiliarmente la ropa buena que tengamos en inventario junto con la que llega 
+junto con la que decidmos producir.
+\\
+Notemos que solo podemos producir hasta donde el genero nos permite por lo que:
+$$ B_t \leq A_{Gt} \forall t \geq 0 $$
+Donde ademas definimos $S_t$ como la cantidad de prendas que vamos a enviar donde a lo mas podremos enviar:
+$S_t \leq \frac{A_{Bt}}{p}$ prendas.
+
+\\
+Donde finalmente tenemos que además solo podemos producir tantos kilos buenos y genero bueno como nos lo permitan las horas lo cual expresamos como:
+$$B_t \tau_b + G_t \tau_g \leq (w_0 + K_t) \cdot h$$
+\\
+Finalmente actualizamos los inventarios para la siguiente iteracion como:
+\begin{align}
+    I_{Gt+1} = (A_Gt - Bt)\\
+    I_{Mt+1} = (A_Mt - Gt)\\
+    I_{Bt+1} = (A_Bt - St \cdot p)\\
+\end{align}
+Finalmente nuestra función objetivo debiese verse como:
+\begin{align}
+    \min \sum_{t \leq T} \Big( (I_{Gt} + I_{Mt} + I_{Bt}) \cdot a  + (w_0 + K_t)(h)(cc) + G_t \cdot g + B_t \cdot n + \min(d_t-S_t, 0)(cp) + (K_t) (c_t)  \Big)
+\end{align}
+Donde G_t, B_t, K_t, S_t seran variables.
