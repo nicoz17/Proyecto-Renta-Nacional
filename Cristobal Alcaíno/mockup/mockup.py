@@ -1,10 +1,11 @@
 import random
 from collections import Counter
+from functions import estimar_probabilidades_ranking_v2
 from functions import generar_perfil_cliente, estimar_probabilidades_ranking, ajustar_probs_por_perfil
 from clientes_dist import samplear_distribucion
 from parametros import dias_del_mes, ranking_acumulado_mes, ventas_acumuladas, clientes_totales, rankings_totales
 from modelo_ces import cargar_datos, predict_auto_arima
-
+from functions import cargar_desde_pickle
 
 # PARAMETROS
 tipos_cliente = ["tipo 1", "tipo 2", "tipo 3", "tipo 4"]
@@ -22,14 +23,14 @@ for dia in dias_del_mes:
     
     # TODO: reemplazar por el ARIMA 
     # TODO: revisar el numero de steps
-    #n_clientes = random.randint(5, 6)
-
-    #print(f"📌 Clientes esperados hoy: {n_clientes}\n")
     ## Hacer una clusterizacion de los clientes
     # En vola un cliente se puede modelar como una clase con id, tipo y nivel de riesgo
 
     forecast = predict_auto_arima(serie, n_steps=dia)
     n_clientes = int(forecast.iloc[0])
+    #n_clientes = random.randint(5, 6)
+    #print(f"📌 Clientes esperados hoy: {n_clientes}\n")
+    
     print(f'n_clientes {n_clientes} dia {dia}')
     # TODO: Hacer sampling
     perfiles_clientes = samplear_distribucion('modelo_distribucion.pkl', n_clientes)
@@ -47,10 +48,13 @@ for dia in dias_del_mes:
     while True:
 
         # TODO: Incluir sugerencia de estimar_probabilidades_ranking_v2
-        probs_base = estimar_probabilidades_ranking(tasa)
-        print()
+        probs_base = estimar_probabilidades_ranking_v2(tasa, cargar_desde_pickle(base_path+"/datos.pkl"))
+        print('Sugerencia')
+        # Hasta aca funciona
+        # TODO: Incluir input de ajuste manual si es necesario
 
         # Mostrar probabilidad para cada perfil:
+        # TODO: Aun no definimos los perfiles
         for idx, perfil in enumerate(perfiles_clientes, start=1):
             probs_ajust = ajustar_probs_por_perfil(probs_base, perfil)
             print(f"La probabilidad de quedar en cada ranking para el perfil Cliente {idx}: {perfil['tipo']}, riesgo {perfil['riesgo']} es:")

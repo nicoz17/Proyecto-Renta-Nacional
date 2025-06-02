@@ -259,3 +259,15 @@ if __name__ == "__test__":
     #guardar_como_picke((datos_clusterizados, modelo_n1, modelo_n2), "BBDD/modelos_cluster.pkl")
 
     print('Success')
+
+# TODO: Test de la regresion logistica
+if __name__ == "__test__":
+    ruta_datos = "BBDD/datos.pkl"
+    datos = cargar_desde_pickle(ruta_datos)
+
+    tasa_ejemplo = 0.35
+    resultado = estimar_probabilidades_ranking_v2(tasa_ejemplo, datos)
+
+    print('probabilidades estimadas para tasa')
+    for ranking, prob in resultado:
+        print(f"Ranking {ranking}: {prob:.4f}")
