@@ -2,11 +2,16 @@ import numpy as np
 import pandas as pd
 import joblib
 import os
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.mixture import BayesianGaussianMixture
 from sklearn.pipeline import Pipeline
+from scipy.stats import ks_2samp, chi2_contingency, wasserstein_distance
+import warnings
+warnings.filterwarnings('ignore')
+
 from functions import cargar_desde_pickle
 
 def aprender_distribucion(df, features_numericas, features_categoricas, model_path):
@@ -81,8 +86,99 @@ def samplear_distribucion(modelo, n_muestras=int):
 
     return df_sampled[available_cols]
 
+def validar_distribuciones(df_original, df_muestra, features_numericas, features_categoricas, output_dir='validacion_plots'):
+    """Valida las distribuciones"""
+    import os
+    os.makedirs(output_dir, exist_ok = True)
+
+    resultados_numericos = {}
+
+    n_num = len(features_numericas)
+    if n_num > 0:
+        fig, axes = plt.subplots(n_num, 3, figsize=(15, 5*n_num))
+        if n_num ==1:
+            axes = axes.reshape(-1,1)
+        
+        for i, col in enumerate(features_numericas):
+            if col not in df_original.columns or col not in df_muestra.columns:
+                print(f"{col} no encontrada")
+                continue
+            orig_data = df_original[col].dropna()
+            muestra_data = df_muestra[col].dropna()
+
+            ks_stat, ks_pvalue = ks_2samp(orig_data, muestra_data)
+            wasserstein_dist = wasserstein_distance(orig_data, muestra_data)
+
+            diff_mean = abs(orig_data.mean() - muestra_data.mean())
+            diff_std = abs(orig_data.std() - muestra_data.std())
+            diff_skew = abs(orig_data.skew() - muestra_data.skew())
+
+            resultados_numericos[col] = {
+                'ks_statistic': ks_stat,
+                'ks_pvalue' : ks_pvalue,
+                'wasserstein_distance': wasserstein_distance,
+                'diff_mean' : diff_mean,
+                'diff_std' : diff_std,
+                'diff_skewness': diff_skew
+            }
+            print(f"\n{col.upper()}:")
+            print(f"  KS Test: statistic={ks_stat:.4f}, p-value={ks_pvalue:.4f}")
+            print(f"  {'✓ Distribuciones similares' if ks_pvalue > 0.05 else '✗ Distribuciones diferentes'}")
+            print(f"  Wasserstein Distance: {wasserstein_dist:.4f}")
+            print(f"  Diff Media: {diff_mean:.4f}, Diff Std: {diff_std:.4f}")
+            
+            # GRÁFICOS
+            # 1. Histogramas superpuestos
+            axes[i, 0].hist(orig_data, alpha=0.7, label='Original', bins=30, density=True)
+            axes[i, 0].hist(muestra_data, alpha=0.7, label='Sintética', bins=30, density=True)
+            axes[i, 0].set_title(f'{col} - Histogramas')
+            axes[i, 0].legend()
+            axes[i, 0].grid(True, alpha=0.3)
+            
+            # 2. Q-Q Plot
+            from scipy.stats import probplot
+            sorted_orig = np.sort(orig_data)
+            sorted_muestra = np.sort(muestra_data)
+            
+            # Interpolar para mismo tamaño
+            if len(sorted_orig) != len(sorted_muestra):
+                min_len = min(len(sorted_orig), len(sorted_muestra))
+                orig_interp = np.interp(np.linspace(0, 1, min_len), 
+                                      np.linspace(0, 1, len(sorted_orig)), sorted_orig)
+                muestra_interp = np.interp(np.linspace(0, 1, min_len), 
+                                         np.linspace(0, 1, len(sorted_muestra)), sorted_muestra)
+            else:
+                orig_interp, muestra_interp = sorted_orig, sorted_muestra
+            
+            axes[i, 1].scatter(orig_interp, muestra_interp, alpha=0.6, s=10)
+            min_val = min(orig_interp.min(), muestra_interp.min())
+            max_val = max(orig_interp.max(), muestra_interp.max())
+            axes[i, 1].plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2)
+            axes[i, 1].set_xlabel('Original')
+            axes[i, 1].set_ylabel('Sintética')
+            axes[i, 1].set_title(f'{col} - Q-Q Plot')
+            axes[i, 1].grid(True, alpha=0.3)
+            
+            # 3. Boxplots comparativos
+            data_box = [orig_data, muestra_data]
+            axes[i, 2].boxplot(data_box, labels=['Original', 'Sintética'])
+            axes[i, 2].set_title(f'{col} - Boxplots')
+            axes[i, 2].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(f"{output_dir}/variables_numericas.png", dpi=300, bbox_inches='tight')
+        plt.show()
+
+        print("\nVARIABLES NUMÉRICAS:")
+        if resultados_numericos:
+            for col, results in resultados_numericos.items():
+                status = "✓ PASS" if results['ks_pvalue'] > 0.05 else "✗ FAIL"
+                print(f"  {col}: {status} (p-value: {results['ks_pvalue']:.4f})")
+        else:
+            print("  No hay variables numéricas para validar")
+
 # TODO: dejar como test
-if __name__ == "__test__":
+if __name__ == "__main__":
     # 1. Cargar datos
     print("Cargando datos...")
     ruta_pickle = os.path.join("BBDD") + "/datos.pkl" 
@@ -110,6 +206,7 @@ if __name__ == "__test__":
     modelo_path = "modelo_distribucion.pkl"
     
     if os.path.exists(modelo_path):
+        # carga el pkl si es que existe
         print("Cargando modelo existente...")
         modelo = joblib.load(modelo_path)
     else:
@@ -148,6 +245,8 @@ if __name__ == "__test__":
         print("\n  Top 5 categorías muestra:")
         print(muest_counts)
     
+    # validacion mas sofisticada
+    resultados_validacion = validar_distribuciones(df_original=df, df_muestra=muestras, features_numericas=features_numericas, features_categoricas=features_categoricas)
     muestras_path = "muestras_generadas.csv"
     muestras.to_csv(muestras_path, index=False)
     print(f"\nMuestras guardadas en: {muestras_path}")
