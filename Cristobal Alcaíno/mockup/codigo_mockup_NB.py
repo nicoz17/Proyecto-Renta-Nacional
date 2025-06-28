@@ -24,7 +24,7 @@ def estimar_probabilidades_ranking(tasa):
     return probs
 
 def ajustar_probs_por_perfil(probs, perfil):
-    
+    ## cual es la definicion de perfil
     # Ejemplo simple: si riesgo es alto, baja un poco prob ranking 1, si bajo la sube un poco
     factor = {"bajo": 1.1, "medio": 1.0, "alto": 0.9}
     ajuste = factor.get(perfil["riesgo"], 1.0)

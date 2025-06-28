@@ -178,7 +178,7 @@ def validar_distribuciones(df_original, df_muestra, features_numericas, features
             print("  No hay variables numéricas para validar")
 
 # TODO: dejar como test
-if __name__ == "__main__":
+if __name__ == "__test__":
     # 1. Cargar datos
     print("Cargando datos...")
     ruta_pickle = os.path.join("BBDD") + "/datos.pkl" 
@@ -195,6 +195,7 @@ if __name__ == "__main__":
     
     print("\nSeleccionando features...")
     # TODO: Revisar
+    # TODO: Definir bien features numericas
     features_numericas = ['TASA_VENTA', 'MESES_GARANTIZADOS', 'RENTA', 'VAN']  # EJEMPLO
     features_categoricas = ['INVALIDA']  # EJEMPLO
     

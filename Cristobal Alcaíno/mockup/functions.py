@@ -16,6 +16,7 @@ from sklearn.metrics import silhouette_score
 # Visualiza los clusters de segundo nivel
 # Función que simula probabilidades en función de la tasa
 #TODO: Usar los argumentos en la funcion
+
 def unir_cotizaciones(bbdd1, bbdd2, base_path='BBDD'):
     """funcion que une 2 xlsx sobre la misma columna COTIZACIONES
     retorna el .xlsx"""

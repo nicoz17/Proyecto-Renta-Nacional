@@ -23,7 +23,7 @@ for dia in dias_del_mes:
     
     # TODO: reemplazar por el ARIMA 
     # TODO: revisar el numero de steps
-    ## Hacer una clusterizacion de los clientes
+    # Hacer una clusterizacion de los clientes
     # En vola un cliente se puede modelar como una clase con id, tipo y nivel de riesgo
 
     forecast = predict_auto_arima(serie, n_steps=dia)
@@ -31,6 +31,7 @@ for dia in dias_del_mes:
     #n_clientes = random.randint(5, 6)
     #print(f"📌 Clientes esperados hoy: {n_clientes}\n")
     
+    # TODO: hacer N cotizaciones
     print(f'n_clientes {n_clientes} dia {dia}')
     # TODO: Hacer sampling
     perfiles_clientes = samplear_distribucion('modelo_distribucion.pkl', n_clientes)

@@ -10,6 +10,7 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 feriados_chile = holidays.CL(years=2025)
 
 ## TODO: Completar
+# revisar en el excel con el sarima --> 
 def obtener_perfiles_para_dia(fecha: datetime) -> list:
     if fecha in feriados_chile or fecha.weekday() == 6:
         return []  # No hay perfiles en feriados o domingos
